@@ -1,6 +1,12 @@
 const db = require("../models");
+const kafkaClient = require("../kafka")
+const kafkaConfig = require("../kafka/config")
+const { v4: uuidv4 } = require('uuid');
 const User = db.user;
 const Op = db.Sequelize.Op;
+
+const producer = kafkaClient.producer;
+
 // Create and Save a new Tutorial
 exports.create = (req, res) => {
 
@@ -20,6 +26,7 @@ exports.create = (req, res) => {
   // Save Tutorial in the database
   User.create(user)
     .then(data => {
+      sendActionMessage("USER_CREATED", data)
       res.send(data);
     })
     .catch(err => {
@@ -27,8 +34,7 @@ exports.create = (req, res) => {
         message:
           err.message || "Some error occurred while creating the User."
       });
-    });
-  
+    }); 
 };
 // Retrieve all Tutorials from the database.
 exports.findAll = (req, res) => {
@@ -73,6 +79,7 @@ exports.update = (req, res) => {
     })
       .then(num => {
         if (num == 1) {
+          sendActionMessage("USER_UPDATED", data)
           res.send({
             message: "User was updated successfully."
           });
@@ -96,6 +103,7 @@ exports.delete = (req, res) => {
     })
       .then(num => {
         if (num == 1) {
+          sendActionMessage("USER_DELETED", data)
           res.send({
             message: "User was deleted successfully!"
           });
@@ -118,6 +126,7 @@ exports.deleteAll = (req, res) => {
         truncate: false
       })
         .then(nums => {
+          sendActionMessage("USER_FLUSHED", data)
           res.send({ message: `${nums} Users were deleted successfully!` });
         })
         .catch(err => {
@@ -127,3 +136,25 @@ exports.deleteAll = (req, res) => {
           });
         });
 };
+
+function sendActionMessage(action, payload, traceId = uuidv4()) {
+  console.log("Sending message to topic :: " + kafkaConfig.KAFKA_TOPIC)
+  message = { "traceId": traceId, "action": action, "payload": payload }
+  if(action){
+    producer.send({
+      topic: kafkaConfig.KAFKA_TOPIC,
+      messages: [
+        {
+          key: null, value: JSON.stringify(message)
+        }
+      ],
+    }).then(()=>{
+      console.log("action message sent successfully")
+    })
+    .catch((err)=>{
+      console.log(err)
+    })
+  }else{
+    console.log("Action not specified")
+  }
+}

@@ -47,19 +47,29 @@ spec:
             - name: "DB_HOST"
               value:  {{ .Values.db.host }}
             - name: "DB_PORT"
-              value:  {{ .Values.db.port }}                     
+              value:  {{ .Values.db.port | quote }}
+            - name: "KAFKA_HOST"
+              value:  {{ .Values.kafka.brokers }} 
+            - name: "KAFKA_CLIENTID"
+              value:  {{ .Values.kafka.clientId }}
+            - name: "KAFKA_GROUPID"
+              value:  {{ .Values.kafka.groupId }}                      
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 3000
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /live
               port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5  
           readinessProbe:
             httpGet:
               path: /ready
               port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5  
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

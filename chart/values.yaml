@@ -39,7 +39,7 @@ securityContext: {}
 service:
   type: ClusterIP
   port: 80
-  targetPort: targetPort
+  targetPort: 3000
 
 ingress:
   enabled: false
@@ -83,7 +83,12 @@ tolerations: []
 affinity: {}
 
 db:
-  host: localhost
+  host: mysqlcluster.usermanagement
   port: 3306
-  username: test
+  username: root
   password: password
+
+kafka:
+  brokers: "my-cluster-kafka-bootstrap.platform:9092"
+  clientId: "usergroup_api"
+  groupId: "usergroup_api"

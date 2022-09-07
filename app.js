@@ -17,7 +17,7 @@ app.use(cookieParser());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-db.sequelize.sync({ force: true })
+db.sequelize.sync({ force: false })
 .then(() => {
   console.log("Drop and re-sync db.");
   
@@ -41,13 +41,5 @@ app.use(function(err, req, res, next) {
   // render the error page
   res.status(err.status || 500);
 });
-
-process.on('SIGTERM', () => {
-  debug('SIGTERM signal received: closing HTTP server')
-  db.sequelize.close();
-  server.close(() => {
-    debug('HTTP server closed')
-  })
-})
 
 module.exports = app;
