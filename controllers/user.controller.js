@@ -80,7 +80,7 @@ exports.update = (req, res) => {
     })
       .then(num => {
         if (num == 1) {
-          kafkaClient.sendActionMessage("USER_UPDATE_SUCCESS", data)
+          kafkaClient.sendActionMessage("USER_UPDATE_SUCCESS", req.params)
           res.send({
             message: "User was updated successfully."
           });
@@ -92,6 +92,7 @@ exports.update = (req, res) => {
         }
       })
       .catch(err => {
+        kafkaClient.sendActionMessage("USER_UPDATE_FAIL", req.params)
         res.status(500).send({
           message: "Error updating User with id=" + id
         });
@@ -105,7 +106,7 @@ exports.delete = (req, res) => {
     })
       .then(num => {
         if (num == 1) {
-          kafkaClient.sendActionMessage("USER_DELETE_SUCCESS", data)
+          kafkaClient.sendActionMessage("USER_DELETE_SUCCESS", req.params)
           res.send({
             message: "User was deleted successfully!"
           });
@@ -117,6 +118,7 @@ exports.delete = (req, res) => {
         }
       })
       .catch(err => {
+        kafkaClient.sendActionMessage("USER_DELETE_FAIL", req.params)
         res.status(500).send({
           message: "Could not delete User with id=" + id
         });
@@ -129,11 +131,11 @@ exports.deleteAll = (req, res) => {
         truncate: false
       })
         .then(nums => {
-          kafkaClient.sendActionMessage("USER_FLUSH_SUCCESS")
+          kafkaClient.sendActionMessage("USER_FLUSH_SUCCESS", {})
           res.send({ message: `${nums} Users were deleted successfully!` });
         })
         .catch(err => {
-          kafkaClient.sendActionMessage("USER_FLUSH_FAIL")
+          kafkaClient.sendActionMessage("USER_FLUSH_FAIL", {})
           res.status(500).send({
             message:
               err.message || "Some error occurred while removing all users."

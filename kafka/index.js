@@ -25,7 +25,7 @@ consumer.connect().then((data)=>{
 
 kafkaClient.sendActionMessage = function(action, payload, traceId = uuidv4()) {
   console.log("Sending message to topic :: " + kafkaConfig.KAFKA_TOPIC)
-  message = { "traceId": traceId, "action": action, "payload": payload }
+  message = { "traceId": traceId, "action": action, "payload": payload, "timestamp": Date.now() }
   if(action){
     producer.send({
       topic: kafkaConfig.KAFKA_TOPIC,
