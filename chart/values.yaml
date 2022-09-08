@@ -90,5 +90,5 @@ db:
 
 kafka:
   brokers: "my-cluster-kafka-bootstrap.platform:9092"
-  clientId: "usergroup_api"
-  groupId: "usergroup_api"
+  clientId: "user_api"
+  groupId: "user_api"

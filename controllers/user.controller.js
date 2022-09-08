@@ -7,7 +7,7 @@ const Op = db.Sequelize.Op;
 
 const producer = kafkaClient.producer;
 
-// Create and Save a new Tutorial
+// Create and Save a new User
 exports.create = (req, res) => {
 
     // Validate request
@@ -17,7 +17,7 @@ exports.create = (req, res) => {
     });
     return;
   }
-  // Create a Tutorial
+  // Create a User
   const user = {
     firstName: req.body.firstName,
     lastName: req.body.lastName,
@@ -37,7 +37,7 @@ exports.create = (req, res) => {
       });
     }); 
 };
-// Retrieve all Tutorials from the database.
+// Retrieve all Users from the database.
 exports.findAll = (req, res) => {
     const firstName = req.query.firstName;
     var condition = firstName ? { firstName: { [Op.like]: `%${firstName}%` } } : null;
@@ -53,7 +53,7 @@ exports.findAll = (req, res) => {
       });
 };
 
-// Find a single Tutorial with an id
+// Find a single User with an id
 exports.findOne = (req, res) => {
     const id = req.params.id;
     User.findByPk(id)
@@ -72,7 +72,7 @@ exports.findOne = (req, res) => {
         });
       });
 };
-// Update a Tutorial by the id in the request
+// Update a User by the id in the request
 exports.update = (req, res) => {
     const id = req.params.id;
     User.update(req.body, {
@@ -98,7 +98,7 @@ exports.update = (req, res) => {
         });
       });
 };
-// Delete a Tutorial with the specified id in the request
+// Delete a User with the specified id in the request
 exports.delete = (req, res) => {
     const id = req.params.id;
     User.destroy({
@@ -124,7 +124,7 @@ exports.delete = (req, res) => {
         });
       });
 };
-// Delete all Tutorials from the database.
+// Delete all Users from the database.
 exports.deleteAll = (req, res) => {
     User.destroy({
         where: {},

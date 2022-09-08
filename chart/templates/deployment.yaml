@@ -53,7 +53,9 @@ spec:
             - name: "KAFKA_CLIENTID"
               value:  {{ .Values.kafka.clientId }}
             - name: "KAFKA_GROUPID"
-              value:  {{ .Values.kafka.groupId }}                      
+              value:  {{ .Values.kafka.groupId }}
+            - name: "PORT"
+              value: "3000"                       
           ports:
             - name: http
               containerPort: 3000
