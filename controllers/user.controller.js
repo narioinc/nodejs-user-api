@@ -26,10 +26,11 @@ exports.create = (req, res) => {
   // Save Tutorial in the database
   User.create(user)
     .then(data => {
-      sendActionMessage("USER_CREATED", data)
+      kafkaClient.sendActionMessage("USER_CREATE_SUCCESS", data)
       res.send(data);
     })
     .catch(err => {
+      kafkaClient.sendActionMessage("USER_CREATE_FAIL", req.body)
       res.status(500).send({
         message:
           err.message || "Some error occurred while creating the User."
@@ -79,11 +80,12 @@ exports.update = (req, res) => {
     })
       .then(num => {
         if (num == 1) {
-          sendActionMessage("USER_UPDATED", data)
+          kafkaClient.sendActionMessage("USER_UPDATE_SUCCESS", data)
           res.send({
             message: "User was updated successfully."
           });
         } else {
+          kafkaClient.sendActionMessage("USER_UPDATE_FAIL", req.params)
           res.send({
             message: `Cannot update User with id=${id}. Maybe User was not found or req.body is empty!`
           });
@@ -103,11 +105,12 @@ exports.delete = (req, res) => {
     })
       .then(num => {
         if (num == 1) {
-          sendActionMessage("USER_DELETED", data)
+          kafkaClient.sendActionMessage("USER_DELETE_SUCCESS", data)
           res.send({
             message: "User was deleted successfully!"
           });
         } else {
+          kafkaClient.sendActionMessage("USER_DELETE_FAIL", req.params)
           res.send({
             message: `Cannot delete User with id=${id}. Maybe User was not found!`
           });
@@ -126,35 +129,14 @@ exports.deleteAll = (req, res) => {
         truncate: false
       })
         .then(nums => {
-          sendActionMessage("USER_FLUSHED", data)
+          kafkaClient.sendActionMessage("USER_FLUSH_SUCCESS")
           res.send({ message: `${nums} Users were deleted successfully!` });
         })
         .catch(err => {
+          kafkaClient.sendActionMessage("USER_FLUSH_FAIL")
           res.status(500).send({
             message:
               err.message || "Some error occurred while removing all users."
           });
         });
 };
-
-function sendActionMessage(action, payload, traceId = uuidv4()) {
-  console.log("Sending message to topic :: " + kafkaConfig.KAFKA_TOPIC)
-  message = { "traceId": traceId, "action": action, "payload": payload }
-  if(action){
-    producer.send({
-      topic: kafkaConfig.KAFKA_TOPIC,
-      messages: [
-        {
-          key: null, value: JSON.stringify(message)
-        }
-      ],
-    }).then(()=>{
-      console.log("action message sent successfully")
-    })
-    .catch((err)=>{
-      console.log(err)
-    })
-  }else{
-    console.log("Action not specified")
-  }
-}
