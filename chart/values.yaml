@@ -84,7 +84,7 @@ tolerations: []
 affinity: {}
 
 db:
-  host: mysqlcluster.usermanagement
+  host: mysqlcluster.platform
   port: 3306
   username: root
   password: password
