@@ -21,17 +21,77 @@ spec:
       app: rollouts-{{ include "chart.fullname" . }}
   template:
     metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
         app: rollouts-{{ include "chart.fullname" . }}
+        {{- include "chart.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "chart.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-      - name: rollouts-{{ include "chart.fullname" . }}
-        image: narioinc89/nodejs-user-api
-        ports:
-        - name: http
-          containerPort: 3000
-          protocol: TCP
-        resources:
-          requests:
-            memory: 32Mi
-            cpu: 5m
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:          
+            - name: "DB_USER"
+              valueFrom:
+                secretKeyRef:
+                  key:  username
+                  name: {{ .Release.Name }}-dbauth
+            - name: "DB_PWD"
+              valueFrom:
+                secretKeyRef:
+                  key:  password
+                  name: {{ .Release.Name }}-dbauth
+            - name: "DB_HOST"
+              value:  {{ .Values.db.host }}
+            - name: "DB_PORT"
+              value:  {{ .Values.db.port | quote }}
+            - name: "KAFKA_HOST"
+              value:  {{ .Values.kafka.brokers }} 
+            - name: "KAFKA_CLIENTID"
+              value:  {{ .Values.kafka.clientId }}
+            - name: "KAFKA_GROUPID"
+              value:  {{ .Values.kafka.groupId }}
+            - name: "PORT"
+              value: "3000"                       
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5  
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5  
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
