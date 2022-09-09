@@ -22,7 +22,6 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "chart.selectorLabels" . | nindent 4 }}
         app: rollouts-{{ include "chart.fullname" . }}
     spec:
       containers:
