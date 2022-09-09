@@ -12,4 +12,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "chart.selectorLabels" . | nindent 4 }}
+    #{{- include "chart.selectorLabels" . | nindent 4 }}
+    app: rollouts-{{ include "chart.fullname" . }}
