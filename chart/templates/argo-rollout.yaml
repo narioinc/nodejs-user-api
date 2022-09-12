@@ -19,6 +19,7 @@ spec:
     metadata:
       {{- with .Values.podAnnotations }}
       annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "false"
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
